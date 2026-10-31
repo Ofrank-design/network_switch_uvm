@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"        # nightly full regression
+  workflow_dispatch:
+
+# Read only by default. No job here needs to write to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERILATOR_VERSION: "5.48.0"
+
+jobs:
+  lint:
+    name: RTL lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Verilator
+        run: |
+          pip install "verilator==${VERILATOR_VERSION}"
+          echo "VERILATOR_ROOT=$(python -c 'import verilator,os;print(os.path.dirname(verilator.__file__))')" >> "$GITHUB_ENV"
+      - name: Lint
+        run: scripts/lint.sh
+
+  simulate:
+    name: Simulate (${{ matrix.suite }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [regress, faults]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends g++ make z3
+          pip install "verilator==${VERILATOR_VERSION}"
+          echo "VERILATOR_ROOT=$(python -c 'import verilator,os;print(os.path.dirname(verilator.__file__))')" >> "$GITHUB_ENV"
+      - name: Fetch pinned UVM
+        run: |
+          scripts/fetch_uvm.sh
+          echo "UVM_HOME=$PWD/third_party/uvm-core/src" >> "$GITHUB_ENV"
+      - name: Regression
+        if: matrix.suite == 'regress'
+        run: scripts/regress.sh -n ${{ github.event_name == 'schedule' && '10' || '2' }}
+      - name: Fault campaign
+        if: matrix.suite == 'faults'
+        run: scripts/fault_campaign.sh
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.suite }}
+          path: |
+            logs/*.txt
+            logs/cov/
+            logs/*.log
+          retention-days: 14

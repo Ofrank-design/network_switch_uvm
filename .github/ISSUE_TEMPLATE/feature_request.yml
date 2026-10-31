@@ -1,0 +1,14 @@
+name: Feature request
+description: A new test, check, coverage point or tool
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What should be verified or improved
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Suggested approach

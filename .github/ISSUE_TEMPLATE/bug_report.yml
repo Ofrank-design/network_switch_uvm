@@ -1,0 +1,34 @@
+name: Bug report
+description: Something fails, hangs, or reports the wrong verdict
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the exact failure message.
+    validations:
+      required: true
+  - type: input
+    id: cmd
+    attributes:
+      label: Command
+      placeholder: scripts/run_sim.sh -t router_rand_test -n 7
+    validations:
+      required: true
+  - type: input
+    id: sim
+    attributes:
+      label: Simulator and version
+      placeholder: Verilator 5.48, Questa 2024.2, ...
+    validations:
+      required: true
+  - type: input
+    id: seed
+    attributes:
+      label: Seed
+  - type: textarea
+    id: log
+    attributes:
+      label: Log excerpt
+      render: text
