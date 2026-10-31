@@ -1,0 +1,39 @@
+# simulator output
+build/
+logs/
+obj_dir/
+work/
+csrc/
+simv*
+xcelium.d/
+xrun.history
+transcript
+*.wlf
+*.vcd
+*.fst
+*.vpd
+*.log
+*.key
+*.ucdb
+ucli.key
+vsim.wlf
+modelsim.ini
+
+# third party sources are fetched, not committed
+third_party/
+
+# python and editors
+__pycache__/
+*.pyc
+.venv/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# secrets must never be committed
+.env
+.env.*
+*.pem
+*.p12
+id_rsa*

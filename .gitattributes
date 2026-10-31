@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.sv  text eol=lf linguist-language=SystemVerilog
+*.svh text eol=lf linguist-language=SystemVerilog
+*.sh  text eol=lf
+*.py  text eol=lf
